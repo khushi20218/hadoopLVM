@@ -1,0 +1,38 @@
+- hosts: slave
+  tasks:
+          - name: creating VG
+            lvg:
+                    vg: hadoopvg
+                    pvs: /dev/sdb,/dev/sdc
+
+          - name: creating LV
+            lvol:
+                    vg: hadoopvg
+                    lv: hadooplv
+                    size: 8G
+
+          - name: creating folder
+            file:
+                   path: /hadoopFolder
+                   state: directory
+
+          - name: formatting
+            filesystem:
+                    fstype: ext4
+                    dev: /dev/hadoopvg/hadooplv
+
+          - name: mounting
+            mount:
+                    path: /hadoopFolder
+                    src: /dev/hadoopvg/hadooplv
+                    fstype: ext4
+                    opts: ro,rw
+                    state: mounted 
+          - debug:
+                  msg: "{{ ansible_all_ipv4_addresses[0] }}" 
+       
+
+
+- hosts: all
+  roles:
+          - role: hadoopLVM
